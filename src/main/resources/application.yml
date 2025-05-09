@@ -1,0 +1,49 @@
+spring:
+  profiles:
+    default: local # 프로파일을 지정하지 않으면 항상 하위에 잇는 로컬파일로 뜬다
+
+  datasource:
+    url: jdbc:h2:mem:~/cafeKioskApplication
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+  jpa:
+    hibernate:
+      ddl-auto: none #ddl자체가 서버가 시작될때 create되는가
+
+---
+spring:
+  config:
+    activate:
+      on-profile: local
+
+  jpa:
+    hibernate:
+      ddl-auto: create
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true # sql예쁘게 보기
+    defer-datasource-initialization: true #Hibernate 초기화 이후 data.sql실행
+
+  h2:
+    console:
+      enabled: true # local에서 콘솔로 접근 가능
+
+---
+spring:
+  config:
+    activate:
+      on-profile: test # 테스트를 실행할때는 이 프로파일을 사용
+
+  jpa:
+    hibernate:
+      ddl-auto: create
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+  sql:
+    init:
+      mode: never # 테스트 상에서는 기본 데이터를 테스트 상에서 만들기 때문에 사용 x
