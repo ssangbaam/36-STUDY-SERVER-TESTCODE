@@ -4,7 +4,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.util.List;
@@ -26,13 +25,7 @@ class ProductRepositoryTest {
     @Test
     void findAllBySellingStatus() {
         //Given
-        Product product1 =Product.builder()
-                .productNumber("001")
-                .type(HANDMADE)
-                .sellingStatus(SELLING)
-                .name("아메리카노")
-                .price(4000)
-                .build();
+        Product product1 = creaeteProduct("001",HANDMADE, SELLING, "아메리카노", 4000);
         Product product2 =Product.builder()
                 .productNumber("002")
                 .type(HANDMADE)
@@ -67,27 +60,9 @@ class ProductRepositoryTest {
     @Test
     void test() {
         //Given
-        Product product1 =Product.builder()
-                .productNumber("001")
-                .type(HANDMADE)
-                .sellingStatus(SELLING)
-                .name("아메리카노")
-                .price(4000)
-                .build();
-        Product product2 =Product.builder()
-                .productNumber("002")
-                .type(HANDMADE)
-                .sellingStatus(HOLD)
-                .name("카페라떼")
-                .price(4000)
-                .build();
-        Product product3 =Product.builder()
-                .productNumber("003")
-                .type(BAKERY)
-                .sellingStatus(STOP_SELLING)
-                .name("크루아상")
-                .price(3500)
-                .build();
+        Product product1 = creaeteProduct("001",HANDMADE, SELLING, "아메리카노", 4000);
+        Product product2 = creaeteProduct("002",HANDMADE, HOLD, "카페라떼", 4500);
+        Product product3 = creaeteProduct("003",BAKERY, STOP_SELLING, "팥빙수", 7000);
 
         productRepository.saveAll(List.of(product1, product2, product3));
 
@@ -108,27 +83,9 @@ class ProductRepositoryTest {
     @Test
     void findAllByProductNumberIn() {
         //Given
-        Product product1 =Product.builder()
-                .productNumber("001")
-                .type(HANDMADE)
-                .sellingStatus(SELLING)
-                .name("아메리카노")
-                .price(4000)
-                .build();
-        Product product2 =Product.builder()
-                .productNumber("002")
-                .type(HANDMADE)
-                .sellingStatus(HOLD)
-                .name("카페라떼")
-                .price(4000)
-                .build();
-        Product product3 =Product.builder()
-                .productNumber("003")
-                .type(BAKERY)
-                .sellingStatus(STOP_SELLING)
-                .name("크루아상")
-                .price(3500)
-                .build();
+        Product product1 = creaeteProduct("001",HANDMADE, SELLING, "아메리카노", 4000);
+        Product product2 = creaeteProduct("002",HANDMADE, HOLD, "카페라떼", 4500);
+        Product product3 = creaeteProduct("003",HANDMADE, STOP_SELLING, "팥빙수", 7000);
 
         productRepository.saveAll(List.of(product1, product2, product3));
 
@@ -145,4 +102,50 @@ class ProductRepositoryTest {
 
     }
 
+    @DisplayName("가장 마지막으로 저장한 상품의 상품번호를 읽어온다.")
+    @Test
+    void findLatestProductNumber() {
+        //Given
+        String targetProductNumber = "003";
+
+        Product product1 = creaeteProduct("001",HANDMADE, SELLING, "아메리카노", 4000);
+        Product product2 = creaeteProduct("002",HANDMADE, HOLD, "카페라떼", 4500);
+        Product product3 = creaeteProduct(targetProductNumber,HANDMADE, STOP_SELLING, "팥빙수", 7000);
+
+        productRepository.saveAll(List.of(product1, product2, product3));
+
+        //When
+        String latestProductNumber = productRepository.findLatestProductNumber();
+
+        //Then
+        assertThat(latestProductNumber).isEqualTo(targetProductNumber);
+
+    }
+
+    @DisplayName("가장 마지막으로 저장한 상품의 상품번호를 읽어올 때, 상품이 하나도 없는 경우에은 null을 반환한다")
+    @Test
+    void findLatestProductNumberWhenProductIsEmpty() {
+        //When
+        String latestProductNumber = productRepository.findLatestProductNumber();
+
+        //Then
+        assertThat(latestProductNumber).isNull();
+
+    }
+
+    private static Product creaeteProduct(
+            String productNumber,
+            ProductType productType,
+            ProductSellingStatus productSellingStatus,
+            String name,
+            int price
+    ) {
+        return Product.builder()
+                .productNumber(productNumber)
+                .type(productType)
+                .sellingStatus(productSellingStatus)
+                .name(name)
+                .price(price)
+                .build();
+    }
 }
